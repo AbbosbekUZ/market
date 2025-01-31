@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Market Boshqaruvi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Chap panel: Bo'limlar -->
+            <div class="col-md-3">
+                <h3>Bo'limlar</h3>
+                <div class="list-group">
+                    {% for bolim in bolimlar %}
+                        <a href="{% url 'bolim' bolim.id %}" class="list-group-item list-group-item-action">
+                            {{ bolim.nom }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- O'ng panel: Ma'lumotlar -->
+            <div class="col-md-9">
+                <!-- Bosh sahifaga qaytish tugmasi -->
+                {% if bolim %}
+                    <a href="{% url 'home' %}" class="btn btn-secondary mb-3">⬅ Bosh sahifaga qaytish</a>
+                {% endif %}
+
+                <!-- Mahsulotlar -->
+                <h3>Mahsulotlar</h3>
+                <div class="row">
+                    {% for mahsulot in mahsulotlar %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card">
+                                {% if mahsulot.rasm %}
+                                    <img src="{{ mahsulot.rasm.url }}" class="card-img-top" alt="{{ mahsulot.nom }}">
+                                {% endif %}
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ mahsulot.nom }}</h5>
+                                    <p class="card-text">
+                                        Narx: {{ mahsulot.narx2 }} so'm<br>
+                                        Miqdor: {{ mahsulot.miqdor }} {{ mahsulot.get_olchov_display }}
+                                    </p>
+                                    <a href="{% url 'mahsulot_sotish' mahsulot.id %}" class="btn btn-primary">Sotib olish</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p>Mahsulotlar mavjud emas.</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Sotuvlar -->
+                <h3>Sotuvlar</h3>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Sana</th>
+                            <th>Mahsulot</th>
+                            <th>Miqdor</th>
+                            <th>Jami Summa</th>
+                            <th>Izoh</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sotuv in sotuvlar %}
+                        <tr>
+                            <td>{{ sotuv.sana }}</td>
+                            <td>{{ sotuv.mahsulot.nom }}</td>
+                            <td>{{ sotuv.miqdor }}</td>
+                            <td>{{ sotuv.jami_summa }}</td>
+                            <td>{{ sotuv.izoh|default:"-" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5">Sotuvlar mavjud emas.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Xarajatlar -->
+                <h3>Xarajatlar</h3>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Sana</th>
+                            <th>Izoh</th>
+                            <th>Summa</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for xarajat in xarajatlar %}
+                        <tr>
+                            <td>{{ xarajat.sana }}</td>
+                            <td>{{ xarajat.izoh }}</td>
+                            <td>{{ xarajat.miqdor }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3">Xarajatlar mavjud emas.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Kirimlar -->
+                <h3>Kirimlar</h3>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Sana</th>
+                            <th>Mahsulot</th>
+                            <th>Miqdor</th>
+                            <th>Narx</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for kirim in kirimlar %}
+                        <tr>
+                            <td>{{ kirim.sana }}</td>
+                            <td>{{ kirim.mahsulot.nom }}</td>
+                            <td>{{ kirim.miqdor }}</td>
+                            <td>{{ kirim.narx }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4">Kirimlar mavjud emas.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Statistika bo‘limi -->
+                <h3>Umumiy Statistika</h3>
+                <p><strong>Jami Foyda:</strong> {{ jami_foyda }} so'm</p>
+                <p><strong>Jami Xarajat:</strong> {{ jami_xarajat }} so'm</p>
+                <p><strong>Sof Foyda:</strong> {{ sof_foyda }} so'm</p>
+
+                <!-- Eng ko‘p sotilgan mahsulotlar -->
+                <h3>Eng Ko‘p Sotilgan 3 Mahsulot</h3>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Mahsulot</th>
+                            <th>Sotilgan miqdor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for mahsulot in top_mahsulotlar %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ mahsulot.mahsulot__nom }}</td>
+                            <td>{{ mahsulot.jami_sotilgan }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3">Hali hech qanday sotuv amalga oshirilmagan.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
